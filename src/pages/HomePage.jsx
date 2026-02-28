@@ -7,6 +7,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [liveReviews, setLiveReviews] = useState([]);
+  const [stats, setStats] = useState(null);
 
   useEffect(() => {
     fetch('/api/reviews/recent')
@@ -24,6 +25,11 @@ export default function HomePage() {
         }
       })
       .catch(() => {});
+
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(data => setStats(data))
+      .catch(() => {});
   }, []);
 
   const handleOrder = () => {
@@ -31,5 +37,5 @@ export default function HomePage() {
     else navigate('/auth');
   };
 
-  return <LandingPage onOrder={handleOrder} liveReviews={liveReviews} />;
+  return <LandingPage onOrder={handleOrder} liveReviews={liveReviews} stats={stats} />;
 }

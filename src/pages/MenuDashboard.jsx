@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -56,9 +56,21 @@ export default function MenuDashboard() {
   const [form, setForm] = useState({ phone: '', address: '', notes: '' });
   const [placing, setPlacing] = useState(false);
   const [orderError, setOrderError] = useState('');
+  const [bestsellerIds, setBestsellerIds] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(data => { if (data.bestseller_ids) setBestsellerIds(data.bestseller_ids); })
+      .catch(() => {});
+  }, []);
 
   const addToCart = (id) => setCart(c => ({ ...c, [id]: (c[id] || 0) + 1 }));
   const removeFromCart = (id) => setCart(c => { const n = { ...c }; if (n[id] > 1) n[id]--; else delete n[id]; return n; });
+
+  const isBest = (item) => bestsellerIds !== null
+    ? bestsellerIds.includes(item.id)
+    : item.best;
 
   const allItems = Object.entries(MENU).flatMap(([cat, items]) => items.map(i => ({ ...i, category: cat })));
   const cartItems = Object.entries(cart).map(([id, qty]) => ({ ...allItems.find(i => i.id === +id), qty }));
@@ -171,7 +183,7 @@ export default function MenuDashboard() {
               <div key={item.id} style={{ background: '#fff', borderRadius: '18px', padding: '22px', border: '1px solid rgba(139,90,43,0.06)', boxShadow: '0 2px 12px rgba(42,24,16,0.03)', position: 'relative', overflow: 'hidden', transition: 'box-shadow 0.3s' }}
                 onMouseOver={e => e.currentTarget.style.boxShadow = '0 8px 28px rgba(42,24,16,0.08)'}
                 onMouseOut={e => e.currentTarget.style.boxShadow = '0 2px 12px rgba(42,24,16,0.03)'}>
-                {item.best && <div style={{ position: 'absolute', top: 12, right: 12, fontFamily: F, fontSize: '9px', fontWeight: 700, background: `linear-gradient(135deg,${gold},#B8860B)`, color: '#fff', padding: '3px 10px', borderRadius: '50px', letterSpacing: '0.5px' }}>★ BESTSELLER</div>}
+                {isBest(item) && <div style={{ position: 'absolute', top: 12, right: 12, fontFamily: F, fontSize: '9px', fontWeight: 700, background: `linear-gradient(135deg,${gold},#B8860B)`, color: '#fff', padding: '3px 10px', borderRadius: '50px', letterSpacing: '0.5px' }}>★ BESTSELLER</div>}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                   <span style={{ width: 10, height: 10, borderRadius: '2px', border: `1.5px solid ${item.veg ? '#2E7D32' : '#C0392B'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <span style={{ width: 5, height: 5, borderRadius: '50%', background: item.veg ? '#2E7D32' : '#C0392B' }} />

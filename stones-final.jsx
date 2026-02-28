@@ -422,11 +422,11 @@ function ReviewsSlideshow({ reviews, gold, dark }) {
 }
 
 /* ═══════════ LANDING PAGE ═══════════ */
-export function LandingPage({ onOrder, liveReviews }) {
+export function LandingPage({ onOrder, liveReviews, stats }) {
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [navSolid, setNavSolid] = useState(false);
   const [cRef, cVis] = useOnScreen(0.3);
-  const [counter, setCounter] = useState({ meals: 0, families: 0, recipes: 0, years: 0 });
+  const [counter, setCounter] = useState({ meals: 0, customers: 0, recipes: 0, years: 0 });
 
   useEffect(() => { setTimeout(() => setHeroLoaded(true), 300); }, []);
   useEffect(() => {
@@ -437,16 +437,18 @@ export function LandingPage({ onOrder, liveReviews }) {
 
   useEffect(() => {
     if (!cVis) return;
-    const targets = { meals: 12000, families: 3500, recipes: 85, years: 22 };
+    const mealsTarget = (stats && stats.meals_served > 0) ? stats.meals_served : 12000;
+    const customersTarget = (stats && stats.happy_customers > 0) ? stats.happy_customers : 3500;
+    const targets = { meals: mealsTarget, customers: customersTarget, recipes: 85, years: 22 };
     const dur = 2200, start = Date.now();
     const anim = () => {
       const p = Math.min((Date.now() - start) / dur, 1);
       const e = 1 - Math.pow(1 - p, 3);
-      setCounter({ meals: Math.floor(targets.meals * e), families: Math.floor(targets.families * e), recipes: Math.floor(targets.recipes * e), years: Math.floor(targets.years * e) });
+      setCounter({ meals: Math.floor(targets.meals * e), customers: Math.floor(targets.customers * e), recipes: Math.floor(targets.recipes * e), years: Math.floor(targets.years * e) });
       if (p < 1) requestAnimationFrame(anim);
     };
     requestAnimationFrame(anim);
-  }, [cVis]);
+  }, [cVis, stats]);
 
   const gold = "#D4A017";
   const dark = "#2A1810";
@@ -552,7 +554,7 @@ export function LandingPage({ onOrder, liveReviews }) {
       <section ref={cRef} style={{ background: `linear-gradient(135deg,${dark},#3D2215)`, padding: "42px 28px", display: "flex", justifyContent: "center", gap: "52px", flexWrap: "wrap" }}>
         {[
           { val: counter.meals.toLocaleString() + "+", label: "Meals Served", icon: "🍛" },
-          { val: counter.families.toLocaleString() + "+", label: "Happy Families", icon: "👨‍👩‍👧‍👦" },
+          { val: counter.customers.toLocaleString() + "+", label: "Happy Customers", icon: "🙌" },
           { val: counter.recipes + "+", label: "Signature Recipes", icon: "📖" },
           { val: counter.years + "+", label: "Years of Cooking", icon: "⏳" },
         ].map((s, i) => (

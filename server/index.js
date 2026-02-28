@@ -72,6 +72,30 @@ app.use('/api/reviews', reviewsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
+app.get('/api/stats', async (req, res) => {
+  try {
+    const [mealsResult, customersResult, bestsellersResult] = await Promise.all([
+      pool.query(`SELECT COUNT(*) as count FROM orders`),
+      pool.query(`SELECT COUNT(DISTINCT user_id) as count FROM orders`),
+      pool.query(`
+        SELECT item_id, SUM(quantity) as total_qty
+        FROM order_items
+        GROUP BY item_id
+        ORDER BY total_qty DESC
+        LIMIT 8
+      `),
+    ]);
+    res.json({
+      meals_served: parseInt(mealsResult.rows[0].count),
+      happy_customers: parseInt(customersResult.rows[0].count),
+      bestseller_ids: bestsellersResult.rows.map(r => r.item_id),
+    });
+  } catch (err) {
+    console.error('Stats error:', err);
+    res.status(500).json({ error: 'Failed to fetch stats' });
+  }
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
