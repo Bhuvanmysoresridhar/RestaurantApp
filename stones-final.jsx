@@ -358,8 +358,71 @@ function MenuPage({ onBack }) {
   );
 }
 
+/* ═══════════ REVIEWS SLIDESHOW ═══════════ */
+function ReviewsSlideshow({ reviews, gold, dark }) {
+  const [current, setCurrent] = useState(0);
+  const [prev, setPrev] = useState(null);
+  const [animating, setAnimating] = useState(false);
+
+  useEffect(() => {
+    if (reviews.length <= 1) return;
+    const t = setInterval(() => {
+      setPrev(current);
+      setAnimating(true);
+      setCurrent(c => (c + 1) % reviews.length);
+      setTimeout(() => { setAnimating(false); setPrev(null); }, 600);
+    }, 4500);
+    return () => clearInterval(t);
+  }, [reviews.length, current]);
+
+  const go = (idx) => {
+    if (idx === current) return;
+    setPrev(current);
+    setAnimating(true);
+    setCurrent(idx);
+    setTimeout(() => { setAnimating(false); setPrev(null); }, 600);
+  };
+
+  const F = "'Outfit', sans-serif";
+  const S = "'Cormorant Garamond', serif";
+  const B = "'Lora', serif";
+
+  if (!reviews.length) return null;
+  const t = reviews[current];
+
+  return (
+    <div style={{ maxWidth: "720px", margin: "0 auto", textAlign: "center" }}>
+      <div style={{ position: "relative", minHeight: "200px", overflow: "hidden" }}>
+        <div style={{
+          opacity: animating ? 0 : 1,
+          transform: animating ? "translateY(16px)" : "translateY(0)",
+          transition: "all 0.55s cubic-bezier(0.16,1,0.3,1)",
+        }}>
+          <div style={{ background: "#fff", borderRadius: "20px", padding: "36px 32px", border: "1px solid rgba(139,90,43,0.06)", boxShadow: "0 4px 28px rgba(42,24,16,0.06)", position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", top: 14, right: 24, fontFamily: S, fontSize: "64px", color: "rgba(212,160,23,0.07)", fontWeight: 700, lineHeight: 1 }}>"</div>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "12px", marginBottom: "16px" }}>
+              <div style={{ width: 48, height: 48, borderRadius: "50%", background: `linear-gradient(135deg,#8B5A2B,${gold})`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: F, fontSize: "14px", fontWeight: 700, color: "#fff", flexShrink: 0 }}>{t.av}</div>
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontFamily: F, fontSize: "14px", fontWeight: 700, color: dark }}>{t.name}</div>
+                <div style={{ fontFamily: F, fontSize: "11px", color: "#B89B7A" }}>{t.loc}</div>
+              </div>
+              <div style={{ marginLeft: "auto", color: gold, fontSize: "14px" }}>{"★".repeat(t.rating || 5)}</div>
+            </div>
+            <p style={{ fontFamily: B, fontSize: "16px", color: "#6B5244", lineHeight: 1.8, fontStyle: "italic", margin: 0 }}>"{t.text}"</p>
+          </div>
+        </div>
+      </div>
+      <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "20px" }}>
+        {reviews.map((_, i) => (
+          <button key={i} onClick={() => go(i)} style={{ width: i === current ? 24 : 8, height: 8, borderRadius: "50px", border: "none", background: i === current ? gold : "rgba(212,160,23,0.25)", cursor: "pointer", padding: 0, transition: "all 0.3s" }} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════ LANDING PAGE ═══════════ */
-function LandingPage({ onOrder }) {
+export function LandingPage({ onOrder, liveReviews }) {
   const [heroLoaded, setHeroLoaded] = useState(false);
   const [navSolid, setNavSolid] = useState(false);
   const [cRef, cVis] = useOnScreen(0.3);
@@ -612,26 +675,9 @@ function LandingPage({ onOrder }) {
             </h2>
           </div>
         </Reveal>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "20px", maxWidth: "860px", margin: "0 auto" }}>
-          {REVIEWS.map((t, i) => (
-            <Reveal key={i} delay={i * 0.1} dir={i % 2 === 0 ? "left" : "right"}>
-              <div style={{ background: "#fff", borderRadius: "16px", padding: "24px", position: "relative", border: "1px solid rgba(139,90,43,0.05)", boxShadow: "0 2px 14px rgba(42,24,16,0.03)", transition: "all 0.3s" }}
-                onMouseOver={e => e.currentTarget.style.boxShadow = "0 8px 28px rgba(42,24,16,0.07)"}
-                onMouseOut={e => e.currentTarget.style.boxShadow = "0 2px 14px rgba(42,24,16,0.03)"}>
-                <div style={{ position: "absolute", top: 14, right: 20, fontFamily: "'Cormorant Garamond', serif", fontSize: "48px", color: "rgba(212,160,23,0.08)", fontWeight: 700, lineHeight: 1 }}>"</div>
-                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: "50%", background: `linear-gradient(135deg,#8B5A2B,${gold})`, display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Outfit', sans-serif", fontSize: "12px", fontWeight: 700, color: "#fff" }}>{t.av}</div>
-                  <div>
-                    <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "12px", fontWeight: 700, color: dark }}>{t.name}</div>
-                    <div style={{ fontFamily: "'Outfit', sans-serif", fontSize: "10px", color: "#B89B7A" }}>{t.loc}</div>
-                  </div>
-                  <div style={{ marginLeft: "auto", color: gold, fontSize: "12px" }}>★★★★★</div>
-                </div>
-                <p style={{ fontFamily: "'Lora', serif", fontSize: "13px", color: "#6B5244", lineHeight: 1.8, fontStyle: "italic" }}>"{t.text}"</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+        <Reveal delay={0.2}>
+          <ReviewsSlideshow reviews={liveReviews && liveReviews.length > 0 ? liveReviews : REVIEWS} gold={gold} dark={dark} />
+        </Reveal>
       </section>
 
       {/* QUOTE */}
