@@ -60,6 +60,17 @@ const initDB = async () => {
       comment_text TEXT NOT NULL,
       created_at TIMESTAMP DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS otps (
+      id SERIAL PRIMARY KEY,
+      target VARCHAR(255) NOT NULL,
+      target_type VARCHAR(10) NOT NULL,
+      otp_code VARCHAR(6) NOT NULL,
+      otp_type VARCHAR(20) NOT NULL,
+      expires_at TIMESTAMP NOT NULL,
+      used BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
   `);
   console.log('Database schema initialized');
 };
