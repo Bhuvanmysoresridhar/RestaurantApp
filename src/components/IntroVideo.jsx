@@ -1,29 +1,25 @@
-import { useState, useEffect } from 'react';
-
-const DRIVE_FILE_ID = '1VHqWFMq8gZIVLz3zlGqLr4qg9otXDjO2';
-const EMBED_URL = `https://drive.google.com/file/d/${DRIVE_FILE_ID}/preview`;
+import { useRef, useState } from 'react';
 
 export default function IntroVideo({ onFinish }) {
-  const [visible, setVisible] = useState(true);
+  const videoRef = useRef(null);
+  const [muted, setMuted] = useState(true);
   const [fading, setFading] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleFinish();
-    }, 30000);
-    return () => clearTimeout(timer);
-  }, []);
-
   function handleFinish() {
+    if (fading) return;
     setFading(true);
     setTimeout(() => {
-      setVisible(false);
       sessionStorage.setItem('sas_intro_seen', 'true');
       onFinish();
     }, 800);
   }
 
-  if (!visible) return null;
+  function toggleMute() {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setMuted(videoRef.current.muted);
+    }
+  }
 
   return (
     <div
@@ -32,25 +28,51 @@ export default function IntroVideo({ onFinish }) {
         inset: 0,
         zIndex: 9999,
         background: '#000',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
         opacity: fading ? 0 : 1,
         transition: 'opacity 0.8s ease',
       }}
     >
-      <iframe
-        src={EMBED_URL}
-        allow="autoplay; fullscreen"
-        allowFullScreen
+      <video
+        ref={videoRef}
+        src="/intro.mp4"
+        autoPlay
+        muted
+        playsInline
+        onEnded={handleFinish}
         style={{
-          width: '100vw',
-          height: '100vh',
-          border: 'none',
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
           display: 'block',
         }}
-        title="Stones & Spices Introduction"
       />
+
+      <button
+        onClick={toggleMute}
+        title={muted ? 'Unmute' : 'Mute'}
+        style={{
+          position: 'absolute',
+          bottom: '40px',
+          left: '40px',
+          background: 'rgba(255,255,255,0.15)',
+          border: '1px solid rgba(255,255,255,0.4)',
+          color: '#fff',
+          width: '42px',
+          height: '42px',
+          borderRadius: '50%',
+          fontSize: '18px',
+          cursor: 'pointer',
+          backdropFilter: 'blur(8px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          transition: 'background 0.2s',
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+      >
+        {muted ? '🔇' : '🔊'}
+      </button>
 
       <button
         onClick={handleFinish}
@@ -70,8 +92,8 @@ export default function IntroVideo({ onFinish }) {
           fontFamily: 'inherit',
           transition: 'background 0.2s',
         }}
-        onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.3)'}
-        onMouseLeave={e => e.target.style.background = 'rgba(255,255,255,0.15)'}
+        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.3)'}
+        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
       >
         SKIP INTRO ›
       </button>
