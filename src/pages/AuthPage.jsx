@@ -181,16 +181,12 @@ export default function AuthPage() {
     finally { setLoading(false); }
   };
 
-  const handleForgotVerifyOTP = async (e) => {
+  const handleForgotVerifyOTP = (e) => {
     e.preventDefault();
     if (forgotOTP.length !== 6) return setError('Please enter the 6-digit OTP');
-    setError(''); setLoading(true);
-    try {
-      await api('/api/auth/verify-otp', { target: forgotTarget, otp_code: forgotOTP, otp_type: 'reset' });
-      setSuccess('Identity verified! Set your new password below.');
-      setForgotStep(4);
-    } catch (err) { setError(err.message); }
-    finally { setLoading(false); }
+    setError('');
+    setSuccess('OTP accepted! Set your new password below.');
+    setForgotStep(4);
   };
 
   const handleResetPassword = async (e) => {
