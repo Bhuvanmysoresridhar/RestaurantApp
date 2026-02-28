@@ -537,7 +537,7 @@ export function LandingPage({ onOrder, liveReviews }) {
         <div style={{ position: "absolute", bottom: 60, right: 48, zIndex: 10, maxWidth: "340px", opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? "none" : "translateY(20px)", transition: "all 1s ease 1.6s" }}>
           <blockquote style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "17px", fontStyle: "italic", fontWeight: 400, color: "rgba(251,247,240,0.65)", lineHeight: 1.5, borderLeft: `3px solid ${gold}`, paddingLeft: "16px" }}>
             "The secret ingredient is always love."
-            <span style={{ display: "block", fontFamily: "'Outfit', sans-serif", fontSize: "9px", fontStyle: "normal", fontWeight: 600, color: gold, marginTop: "8px", letterSpacing: "2px", textTransform: "uppercase" }}>— Sujata, Founder</span>
+            <span style={{ display: "block", fontFamily: "'Outfit', sans-serif", fontSize: "9px", fontStyle: "normal", fontWeight: 600, color: gold, marginTop: "8px", letterSpacing: "2px", textTransform: "uppercase" }}>— Komalatha N, Founder</span>
           </blockquote>
         </div>
 
