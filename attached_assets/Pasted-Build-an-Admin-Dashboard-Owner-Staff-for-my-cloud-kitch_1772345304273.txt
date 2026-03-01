@@ -1,0 +1,134 @@
+Build an Admin Dashboard (Owner + Staff) for my cloud kitchen app “Stones & Spices”.
+
+Goal:
+Create a separate, secure dashboard for kitchen owner and staff to manage orders, menu, kitchen open/closed status, inventory, and order tracking. This admin dashboard must not be accessible to regular customers.
+
+Tech/Implementation Requirements:
+- Use a production-ready full-stack structure.
+- Use a real database (PostgreSQL recommended) with migrations.
+- Use role-based access control (RBAC) with two roles: OWNER and STAFF.
+- Authentication:
+  - Separate login/signup page for admin users (staff + owner).
+  - Forgot password flow (email-based reset link).
+  - “Forgot email” flow: allow the user to recover the login email using phone number OR username + security question (choose one simple method and implement it).
+  - Sessions with secure cookies or JWT.
+- Build two UIs:
+  1) Customer app (existing / not modified much)
+  2) Admin dashboard (new, protected routes)
+
+Core Features (Admin Dashboard):
+
+1) Order Management (Main feature)
+- Show a live list of all orders with:
+  - Order ID
+  - Customer name + phone (if available)
+  - Items summary (e.g., “3 items”)
+  - Total amount
+  - Payment status (paid/unpaid if applicable)
+  - Order status (see statuses below)
+  - Created time
+- Staff actions:
+  - Accept order / Reject order
+  - Once accepted, order status becomes “PREPARING”
+- Order status lifecycle:
+  - NEW (just placed)
+  - ACCEPTED (optional step) / PREPARING
+  - READY_FOR_DELIVERY
+  - OUT_FOR_DELIVERY
+  - DELIVERED
+  - COMPLETED
+  - REJECTED
+  - CANCELLED
+- Each order page (click into an order) should show:
+  - Customer details
+  - Full item list with quantities
+  - Notes (optional)
+  - Total amount
+  - Status timeline
+  - Buttons to move order to the next status
+- Item-level tracking inside an order:
+  - Each item should also have a status:
+    - PENDING / PREPARING / DONE
+  - Staff can mark each item as DONE
+  - Order can only be moved to READY_FOR_DELIVERY after all items are DONE (or provide an override for OWNER only)
+
+2) Kitchen Open / Closed Toggle
+- Admin can toggle kitchen status: OPEN or CLOSED.
+- If CLOSED:
+  - Customer app should show “Kitchen is currently closed” and prevent checkout.
+- Show a prominent OPEN/CLOSED badge in admin header.
+
+3) Menu Management (Add/Edit/Availability/Out-of-stock)
+- Admin can add new menu items with:
+  - Name
+  - Description
+  - Category (Breakfast/Lunch/Dinner/Snacks)
+  - Price
+  - Veg/Non-veg flag
+  - Spice level (mild/medium/spicy)
+  - Image (optional)
+- Each menu item must have:
+  - is_available (true/false) to show to users
+  - stock_status (IN_STOCK / OUT_OF_STOCK)
+- Admin can toggle “Available” and “Out of stock” per item.
+- Customer app should reflect:
+  - Items out of stock are visible but disabled (or hidden — pick one and implement consistently).
+- Menu changes must reflect instantly in customer ordering menu.
+
+4) Separate Orders per Customer + No Confusion
+- Orders must be uniquely tracked by Order ID and customer ID.
+- Admin list should support:
+  - Search by Order ID / customer name / phone
+  - Filters by status (NEW, PREPARING, READY, etc.)
+  - Sort by time (latest first)
+
+5) Owner-only Analytics & Financial Dashboard
+- Only OWNER role can see analytics.
+- Analytics page should show:
+  - Total orders today / this month / this year
+  - Total revenue today / this month / this year
+  - Revenue by day (simple chart)
+  - Average order value
+- Data must be computed from paid/completed orders.
+- Staff should NOT see revenue numbers.
+
+6) Admin User Management (Owner only)
+- OWNER can:
+  - Create staff accounts
+  - Disable staff accounts
+  - Reset staff password (optional)
+- STAFF can only manage orders/menu/status but cannot see financial analytics.
+
+Database Models (create tables & relations):
+- AdminUser: id, name, email, password_hash, role (OWNER/STAFF), is_active, created_at
+- CustomerUser: id, name, email/phone, created_at
+- MenuItem: id, name, description, category, price, is_available, stock_status, veg_flag, spice_level, image_url, created_at, updated_at
+- KitchenStatus: id (single row), is_open, updated_at, updated_by_admin_id
+- Order: id, customer_id, total_amount, payment_status, status, created_at, updated_at
+- OrderItem: id, order_id, menu_item_id, name_snapshot, price_snapshot, qty, item_status, notes
+
+Important UI Pages (Admin):
+- /admin/login
+- /admin/signup (or owner creates staff; you choose better and implement)
+- /admin/forgot-password
+- /admin/dashboard (orders list)
+- /admin/orders/:id (order detail + item-level statuses)
+- /admin/menu (menu items list + toggles + add/edit form)
+- /admin/kitchen-status (open/closed toggle)
+- /admin/analytics (OWNER only)
+- /admin/staff-management (OWNER only)
+
+Permissions:
+- STAFF: orders, menu, kitchen open/close
+- OWNER: everything including analytics + staff management
+
+Quality Requirements:
+- Clean UI (simple but professional dashboard layout)
+- Validation and clear error messages
+- No duplicate orders, no race conditions on status update
+- Use server-side authorization checks (not only UI hiding)
+
+Deliverables:
+- Full working code with DB migrations
+- Seed script for sample menu items + one owner account
+- README with setup and deployment steps

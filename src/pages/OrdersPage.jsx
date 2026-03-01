@@ -8,6 +8,28 @@ const F = "'Outfit', sans-serif";
 const S = "'Cormorant Garamond', serif";
 const B = "'Lora', serif";
 
+const STATUS_CONFIG = {
+  pending:            { label: 'Pending',           color: '#F59E0B', bg: 'rgba(245,158,11,0.1)' },
+  confirmed:          { label: 'Accepted',           color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
+  accepted:           { label: 'Accepted',           color: '#3B82F6', bg: 'rgba(59,130,246,0.1)' },
+  preparing:          { label: 'Preparing',          color: '#8B5CF6', bg: 'rgba(139,92,246,0.1)' },
+  ready_for_delivery: { label: 'Ready',              color: '#10B981', bg: 'rgba(16,185,129,0.1)' },
+  out_for_delivery:   { label: 'Out for Delivery',   color: '#06B6D4', bg: 'rgba(6,182,212,0.1)' },
+  delivered:          { label: 'Delivered',          color: '#2E7D32', bg: 'rgba(46,125,50,0.1)' },
+  completed:          { label: 'Completed ✓',        color: '#16A34A', bg: 'rgba(22,163,74,0.1)' },
+  rejected:           { label: 'Rejected',           color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
+  cancelled:          { label: 'Cancelled',          color: '#EF4444', bg: 'rgba(239,68,68,0.1)' },
+};
+
+function StatusBadge({ status }) {
+  const cfg = STATUS_CONFIG[status] || { label: status, color: '#6B7280', bg: 'rgba(107,114,128,0.1)' };
+  return (
+    <span style={{ fontFamily: F, fontSize: '11px', fontWeight: 700, color: cfg.color, background: cfg.bg, padding: '3px 10px', borderRadius: '50px' }}>
+      {cfg.label}
+    </span>
+  );
+}
+
 function InvoiceModal({ order, onClose }) {
   const date = new Date(order.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   return (
@@ -35,7 +57,7 @@ function InvoiceModal({ order, onClose }) {
             </div>
             <div>
               <div style={{ fontFamily: F, fontSize: '10px', color: '#B89B7A', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Status</div>
-              <div style={{ display: 'inline-block', fontFamily: F, fontSize: '12px', fontWeight: 700, color: '#2E7D32', background: 'rgba(46,125,50,0.1)', padding: '3px 10px', borderRadius: '50px' }}>✓ {order.status}</div>
+              <StatusBadge status={order.status} />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
               <div style={{ fontFamily: F, fontSize: '10px', color: '#B89B7A', letterSpacing: '1px', textTransform: 'uppercase', fontWeight: 600, marginBottom: '4px' }}>Delivery Address</div>
@@ -264,7 +286,7 @@ export default function OrdersPage() {
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
                         <span style={{ fontFamily: F, fontSize: '16px', fontWeight: 700, color: dark }}>Order #{String(order.id).padStart(4, '0')}</span>
-                        <span style={{ fontFamily: F, fontSize: '11px', fontWeight: 700, color: '#2E7D32', background: 'rgba(46,125,50,0.1)', padding: '2px 10px', borderRadius: '50px' }}>✓ {order.status}</span>
+                        <StatusBadge status={order.status} />
                       </div>
                       <div style={{ fontFamily: F, fontSize: '12px', color: '#B89B7A' }}>{date} at {time}</div>
                     </div>
